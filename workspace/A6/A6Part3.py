@@ -55,7 +55,7 @@ An interesting task would be to compare the inharmonicities present in the sound
 """
 def estimateInharmonicity(inputFile = '../../sounds/piano.wav', t1=0.1, t2=0.5, window='hamming', 
                             M=2048, N=2048, H=128, f0et=5.0, t=-90, minf0=130, maxf0=180, nH = 10):
-    """
+	"""
     Function to estimate the extent of inharmonicity present in a sound
     Input:
         inputFile (string): wav file including the path
@@ -73,13 +73,31 @@ def estimateInharmonicity(inputFile = '../../sounds/piano.wav', t1=0.1, t2=0.5, 
     Output:
         meanInharm (float or np.float): mean inharmonicity over all the frames between the time interval 
                                         t1 and t2. 
-    """
-    # 0. Read the audio file and obtain an analysis window
-    
-    # 1. Use harmonic model to compute the harmonic frequencies and magnitudes
-    
-    # 2. Extract the time segment in which you need to compute the inharmonicity. 
-    
-    # 3. Compute the mean inharmonicity of the segment
+	"""
+	# 0. Read the audio file and obtain an analysis window
+	fs, x = UF.wavread(inputFile)  # reading inputFile
+	w = get_window(window, M)  # obtaining analysis window
+
+	# 1. Use harmonic model to compute the harmonic frequencies and magnitudes
+	xhfreq, xhmag, xhphase = HM.harmonicModelAnal(x, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope=0.01, minSineDur=0.0)
+
+	# 2. Extract the time segment in which you need to compute the inharmonicity.
+	lt1 = int(np.ceil(fs*t1/float(H)))
+	lt2 = int(np.floor(fs*t2/float(H)))
+	xSeg = xhfreq[lt1: lt2]
+
+	# 3. Compute the mean inharmonicity of the segment
+	I = np.zeros(xSeg.shape[0])
+	for l in range(0, xSeg.shape[0]):
+		nonZeroFreqs = np.where(xSeg[l, :] > 0.0)[0]
+		nonZeroFreqs = np.delete(nonZeroFreqs, 0)
+		for r in nonZeroFreqs:
+			I[l] += ( np.abs(xSeg[l, r] - (r+1)*xSeg[l, 0]) )/float(r+1)
+		#I[l] = 1.0/nonZeroFreqs.size * I[l]
+		I[l] = 1.0 / nH * I[l]
+
+	meanInharm = 1.0/(lt2 - lt1) * np.sum(I)
+
+	return meanInharm
 
 

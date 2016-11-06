@@ -73,10 +73,11 @@ use, the function might take a while to run (even half a minute in some cases).
 
 """
 
-def segmentStableNotesRegions(inputFile = '../../sounds/sax-phrase-short.wav', stdThsld=10, minNoteDur=0.1, 
-                              winStable = 3, window='hamming', M=1024, N=2048, H=256, f0et=5.0, t=-100, 
-                              minf0=310, maxf0=650):
-    """
+
+def segmentStableNotesRegions(inputFile='../../sounds/sax-phrase-short.wav', stdThsld=10, minNoteDur=0.1,
+							  winStable=3, window='hamming', M=1024, N=2048, H=256, f0et=5.0, t=-100,
+							  minf0=310, maxf0=650):
+	"""
     Function to segment the stable note regions in an audio signal
     Input:
         inputFile (string): wav file including the path
@@ -94,58 +95,78 @@ def segmentStableNotesRegions(inputFile = '../../sounds/sax-phrase-short.wav', s
     Output:
         segments (np.ndarray): Numpy array containing starting and ending frame indexes of every segment.
     """
-    fs, x = UF.wavread(inputFile)                               #reading inputFile
-    w  = get_window(window, M)                                  #obtaining analysis window    
-    f0 = HM.f0Detection(x, fs, w, N, H, t, minf0, maxf0, f0et)  #estimating F0
+	fs, x = UF.wavread(inputFile)  		# reading inputFile
+	w = get_window(window, M)  # obtaining analysis window
+	f0 = HM.f0Detection(x, fs, w, N, H, t, minf0, maxf0, f0et)  # estimating F0
 
-    ### your code here
+	### your code here
 
-    # 1. convert f0 values from Hz to Cents (as described in pdf document)
+	# 1. convert f0 values from Hz to Cents (as described in pdf document)
+	f0Cents = 1200 * np.log2((f0 + eps) / 55.0)
 
-    #2. create an array containing standard deviation of last winStable samples
+	# 2. create an array containing standard deviation of last winStable samples
+	stDevs = np.zeros(f0Cents.size)
+	for f in range(winStable-1, f0Cents.size):
+		stDevs[f] = np.std(f0Cents[f-winStable+1:f+1])
 
-    #3. apply threshold on standard deviation values to find indexes of the stable points in melody
+	# 3. apply threshold on standard deviation values to find indexes of the stable points in melody
+	stdWhere = np.where(stDevs <= stdThsld)[0]
+	stdWhere = stdWhere[winStable:]
 
-    #4. create segments of continuous stable points such that consecutive stable points belong to same segment
-    
-    #5. apply segment filtering, i.e. remove segments with are < minNoteDur in length
-    
-    # plotSpectogramF0Segments(x, fs, w, N, H, f0, segments)  # Plot spectrogram and F0 if needed
+	# 4. create segments of continuous stable points such that consecutive stable points belong to same segment
+	segments = np.empty((0, 2), int)
+	startIdx = stdWhere[0]
+	endIdx = stdWhere[0]
+	for i in range(1,stdWhere.size):
+		if stdWhere[i] == stdWhere[i-1]+1:
+			endIdx = stdWhere[i]
+		else:
+			segments = np.vstack([segments, [startIdx, endIdx]])
+			startIdx = stdWhere[i]
+			endIdx = startIdx
 
-    # return segments
+	# 5. apply segment filtering, i.e. remove segments with are < minNoteDur in length
+	segLens = segments[:, 1] - segments[:, 0]
+	minNoteDurSamples = int(minNoteDur * fs / H)
+	segsToKeep = np.where(segLens >= minNoteDurSamples)[0]
+	segments = segments[segsToKeep, :]
+
+	#plotSpectogramF0Segments(x, fs, w, N, H, f0, segments)  # Plot spectrogram and F0 if needed
+
+	return segments
 
 
 def plotSpectogramF0Segments(x, fs, w, N, H, f0, segments):
-    """
+	"""
     Code for plotting the f0 contour on top of the spectrogram
     """
-    # frequency range to plot
-    maxplotfreq = 1000.0    
-    fontSize = 16
+	# frequency range to plot
+	maxplotfreq = 1000.0
+	fontSize = 16
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
 
-    mX, pX = stft.stftAnal(x, fs, w, N, H)                      #using same params as used for analysis
-    mX = np.transpose(mX[:,:int(N*(maxplotfreq/fs))+1])
-    
-    timeStamps = np.arange(mX.shape[1])*H/float(fs)                             
-    binFreqs = np.arange(mX.shape[0])*fs/float(N)
-    
-    plt.pcolormesh(timeStamps, binFreqs, mX)
-    plt.plot(timeStamps, f0, color = 'k', linewidth=5)
+	mX, pX = stft.stftAnal(x, w, N, H)  # using same params as used for analysis
+	mX = np.transpose(mX[:, :int(N * (maxplotfreq / fs)) + 1])
 
-    for ii in range(segments.shape[0]):
-        plt.plot(timeStamps[segments[ii,0]:segments[ii,1]], f0[segments[ii,0]:segments[ii,1]], color = '#A9E2F3', linewidth=1.5)        
-    
-    plt.autoscale(tight=True)
-    plt.ylabel('Frequency (Hz)', fontsize = fontSize)
-    plt.xlabel('Time (s)', fontsize = fontSize)
-    plt.legend(('f0','segments'))
-    
-    xLim = ax.get_xlim()
-    yLim = ax.get_ylim()
-    ax.set_aspect((xLim[1]-xLim[0])/(2.0*(yLim[1]-yLim[0])))    
-    plt.autoscale(tight=True) 
-    plt.show()
-    
+	timeStamps = np.arange(mX.shape[1]) * H / float(fs)
+	binFreqs = np.arange(mX.shape[0]) * fs / float(N)
+
+	plt.pcolormesh(timeStamps, binFreqs, mX)
+	plt.plot(timeStamps, f0, color='k', linewidth=5)
+
+	for ii in range(segments.shape[0]):
+		plt.plot(timeStamps[segments[ii, 0]:segments[ii, 1]], f0[segments[ii, 0]:segments[ii, 1]], color='#A9E2F3',
+				 linewidth=1.5)
+
+	plt.autoscale(tight=True)
+	plt.ylabel('Frequency (Hz)', fontsize=fontSize)
+	plt.xlabel('Time (s)', fontsize=fontSize)
+	plt.legend(('f0', 'segments'))
+
+	xLim = ax.get_xlim()
+	yLim = ax.get_ylim()
+	ax.set_aspect((xLim[1] - xLim[0]) / (2.0 * (yLim[1] - yLim[0])))
+	plt.autoscale(tight=True)
+	plt.show()

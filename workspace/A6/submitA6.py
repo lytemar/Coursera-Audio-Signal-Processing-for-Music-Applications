@@ -12,7 +12,10 @@ import base64
 import numpy as np
 import subprocess
 import os
-
+import warnings
+warnings.filterwarnings("ignore")
+import matplotlib.pyplot as plt
+plt.ion()
 """"""""""""""""""""
 """"""""""""""""""""
 
@@ -103,9 +106,14 @@ def get_parts(partIdx, output):
     
 def submitSolution(email_address, secret, output, partIdx):
     """Submits a solution to the server. Returns (result, string)."""
-    output_64_msg = email.message.Message()
-    output_64_msg.set_payload(output)
-    email.encoders.encode_base64(output_64_msg)
+    if output == '':
+        print ''
+        print "== Submission failed: Please correct and resubmit."
+        sys.exit(1)
+    else:
+        output_64_msg = email.message.Message()
+        output_64_msg.set_payload(output)
+        email.encoders.encode_base64(output_64_msg)
     parts = get_parts(partIdx, output_64_msg.get_payload())
     
     values = { "assignmentKey" : ASSIGNMENT_KEY, \
@@ -119,7 +127,10 @@ def submitSolution(email_address, secret, output, partIdx):
 def get_all_parts(outputs):
     parts = {}
     for idx, parti in enumerate(LIST_PARTIDS):
-        parts[parti] = {"output" : outputs[idx]}
+        if outputs[idx]:
+            parts[parti] = {"output" : outputs[idx]}
+        else:
+            parts[parti] = {}
     return parts
 
 def submitSolution_all_parts(email_adress, secret):
@@ -127,10 +138,13 @@ def submitSolution_all_parts(email_adress, secret):
     outputs = []
     for idx in range(len(LIST_PARTIDS)):
         out = output(idx)
-        output_64_msg = email.message.Message()
-        output_64_msg.set_payload(out)
-        email.encoders.encode_base64(output_64_msg)
-        outputs.append(output_64_msg.get_payload() + '\n\n\n' + source(idx)) # concatenating the source code for log
+        if out == '':
+            outputs.append(None)
+        else:
+            output_64_msg = email.message.Message()
+            output_64_msg.set_payload(out)
+            email.encoders.encode_base64(output_64_msg)
+            outputs.append(output_64_msg.get_payload() + '\n\n\n' + source(idx)) # concatenating the source code for log
     parts = get_all_parts(outputs)
     values = { "assignmentKey" : ASSIGNMENT_KEY, \
              "submitterEmail" : email_adress, \
@@ -194,9 +208,9 @@ def convertNpObjToStr(obj):
         return json.dumps(dict(__ndarray__=data_b64,dtype=str(obj.dtype),shape=obj.shape))
     return json.dumps(obj)
 
-def wrongOutputTypeError(outType):
-    print "The output data type of your function doesn't match the expected data type (" + str(outType) + ")."
-    print "== Submission failed: Please correct and resubmit."
+def wrongOutputTypeError(outType, part):
+    print "\n Type error in Part " + str(part+1) + " - The output data type of your function doesn't match the expected data type: (" + str(outType) + ")."
+    #print "== Submission failed: Please correct and resubmit."
 
 def wrongSubmission():
     print "\n== Submission failed: Please check your email and token again and resubmit."
@@ -238,8 +252,9 @@ def output(partIdx):
             if outputType[pID][0] == type(answer):
                 outputString += convertNpObjToStr(answer) + '\n'
             else:
-                wrongOutputTypeError(outputType[pID][0])
-                sys.exit(1)
+                wrongOutputTypeError(outputType[pID][0],partIdx)
+                return ''
+                #sys.exit(1) 
   
     elif partIdx == 1: # This is A6-part-2:
         pID = 'A6-part-2'
@@ -250,8 +265,9 @@ def output(partIdx):
                     print "Shape of the returned numpy array doesn't match the expected shape (k,2). Number of columns returned are " + str(answer.shape[1]) + "."
                 outputString += convertNpObjToStr(answer) + '\n'
             else:
-                wrongOutputTypeError(outputType[pID][0])
-                sys.exit(1)      
+                wrongOutputTypeError(outputType[pID][0],partIdx)
+                return ''
+                #sys.exit(1)       
       
     elif partIdx == 2: # This is A6-part-3:
         pID = 'A6-part-3'
@@ -262,8 +278,9 @@ def output(partIdx):
             elif outputType[pID][0] == float and str(type(answer)).count('float') >0:
                 outputString += convertNpObjToStr(answer) + '\n'
             else:
-                wrongOutputTypeError(outputType[pID][0])
-                sys.exit(1)         
+                wrongOutputTypeError(outputType[pID][0],partIdx)
+                return ''
+                #sys.exit(1)         
 
     return outputString.strip()
 

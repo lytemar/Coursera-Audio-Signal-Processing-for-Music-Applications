@@ -109,7 +109,7 @@ def computeAndPlotF0(inputFile = '../../sounds/piano.wav'):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    mX, pX = stft.stftAnal(x, fs, w, N, H)                      #using same params as used for analysis
+    mX, pX = stft.stftAnal(x, w, N, H)                      #using same params as used for analysis
     mX = np.transpose(mX[:,:int(N*(maxplotfreq/fs))+1])
     
     timeStamps = np.arange(mX.shape[1])*H/float(fs)                             

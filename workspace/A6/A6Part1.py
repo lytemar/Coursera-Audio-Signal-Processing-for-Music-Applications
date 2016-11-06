@@ -67,13 +67,13 @@ def estimateF0(inputFile = '../../sounds/cello-double-2.wav'):
     """
 
     ### Change these analysis parameter values marked as XX
-    window = XX
-    M = XX
-    N = XX
-    f0et = XX
-    t = XX
-    minf0 = XX
-    maxf0 = XX
+    window = 'blackmanharris'
+    M = 7001
+    N = 8192
+    f0et = 2
+    t = -100
+    minf0 = 140
+    maxf0 = 200
 
     ### Do not modify the code below 
     H = 256                                                     #fix hop size
@@ -99,7 +99,7 @@ def estimateF0(inputFile = '../../sounds/cello-double-2.wav'):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    mX, pX = stft.stftAnal(x, fs, w, N, H)                      #using same params as used for analysis
+    mX, pX = stft.stftAnal(x, w, N, H)                      #using same params as used for analysis
     mX = np.transpose(mX[:,:int(N*(maxplotfreq/fs))+1])
     
     timeStamps = np.arange(mX.shape[1])*H/float(fs)                             
