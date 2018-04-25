@@ -9,69 +9,69 @@ import utilFunctions as UF
 import dftModel as DFT
 
 def main(inputFile = '../../sounds/piano.wav', window = 'blackman', M = 511, N = 1024, time = .2):
-	"""
-	inputFile: input sound file (monophonic with sampling rate of 44100)
-	window: analysis window type (choice of rectangular, hanning, hamming, blackman, blackmanharris)	
-	M: analysis window size (odd integer value)
-	N: fft size (power of two, bigger or equal than than M)
-	time: time  to start analysis (in seconds)          
-	"""
+    """
+    inputFile: input sound file (monophonic with sampling rate of 44100)
+    window: analysis window type (choice of rectangular, hanning, hamming, blackman, blackmanharris)
+    M: analysis window size (odd integer value)
+    N: fft size (power of two, bigger or equal than than M)
+    time: time  to start analysis (in seconds)
+    """
 
-	# read input sound (monophonic with sampling rate of 44100)
-	fs, x = UF.wavread(inputFile)
+    # read input sound (monophonic with sampling rate of 44100)
+    fs, x = UF.wavread(inputFile)
 
-	# compute analysis window
-	w = get_window(window, M)
-		
-	# get a fragment of the input sound of size M
-	sample = int(time*fs)
-	if (sample+M >= x.size or sample < 0):                          # raise error if time outside of sound
-		raise ValueError("Time outside sound boundaries")
-	x1 = x[sample:sample+M]
-	 
-	# compute the dft of the sound fragment
-	mX, pX = DFT.dftAnal(x1, w, N)
+    # compute analysis window
+    w = get_window(window, M)
 
-	# compute the inverse dft of the spectrum
-	y = DFT.dftSynth(mX, pX, w.size)*sum(w)
+    # get a fragment of the input sound of size M
+    sample = int(time*fs)
+    if (sample+M >= x.size or sample < 0):                          # raise error if time outside of sound
+        raise ValueError("Time outside sound boundaries")
+    x1 = x[sample:sample+M]
 
-	# create figure
-	plt.figure(figsize=(12, 9))
+    # compute the dft of the sound fragment
+    mX, pX = DFT.dftAnal(x1, w, N)
 
-	# plot the sound fragment
-	plt.subplot(4,1,1)
-	plt.plot(time + np.arange(M)/float(fs), x1)
-	plt.axis([time, time + M/float(fs), min(x1), max(x1)])
-	plt.ylabel('amplitude')
-	plt.xlabel('time (sec)')
-	plt.title('input sound: x')
+    # compute the inverse dft of the spectrum
+    y = DFT.dftSynth(mX, pX, w.size)*sum(w)
 
-	# plot the magnitude spectrum
-	plt.subplot(4,1,2)
-	plt.plot(float(fs)*np.arange(mX.size)/float(N), mX, 'r')
-	plt.axis([0, fs/2.0, min(mX), max(mX)])
-	plt.title ('magnitude spectrum: mX')
-	plt.ylabel('amplitude (dB)')
-	plt.xlabel('frequency (Hz)')
+    # create figure
+    plt.figure(figsize=(12, 9))
 
-	# plot the phase spectrum
-	plt.subplot(4,1,3)
-	plt.plot(float(fs)*np.arange(pX.size)/float(N), pX, 'c')
-	plt.axis([0, fs/2.0, min(pX), max(pX)])
-	plt.title ('phase spectrum: pX')
-	plt.ylabel('phase (radians)')
-	plt.xlabel('frequency (Hz)')
+    # plot the sound fragment
+    plt.subplot(4,1,1)
+    plt.plot(time + np.arange(M)/float(fs), x1)
+    plt.axis([time, time + M/float(fs), min(x1), max(x1)])
+    plt.ylabel('amplitude')
+    plt.xlabel('time (sec)')
+    plt.title('input sound: x')
 
-	# plot the sound resulting from the inverse dft
-	plt.subplot(4,1,4)
-	plt.plot(time + np.arange(M)/float(fs), y)
-	plt.axis([time, time + M/float(fs), min(y), max(y)])
-	plt.ylabel('amplitude')
-	plt.xlabel('time (sec)')
-	plt.title('output sound: y')
+    # plot the magnitude spectrum
+    plt.subplot(4,1,2)
+    plt.plot(float(fs)*np.arange(mX.size)/float(N), mX, 'r')
+    plt.axis([0, fs/2.0, min(mX), max(mX)])
+    plt.title ('magnitude spectrum: mX')
+    plt.ylabel('amplitude (dB)')
+    plt.xlabel('frequency (Hz)')
+    # plot the phase spectrum
+    plt.subplot(4,1,3)
+    plt.plot(float(fs)*np.arange(pX.size)/float(N), pX, 'c')
+    plt.axis([0, fs/2.0, min(pX), max(pX)])
+    plt.title ('phase spectrum: pX')
+    plt.ylabel('phase (radians)')
+    plt.xlabel('frequency (Hz)')
 
-	plt.tight_layout()
-	plt.show()
+    # plot the sound resulting from the inverse dft
+    plt.subplot(4,1,4)
+    plt.plot(time + np.arange(M)/float(fs), y)
+    plt.axis([time, time + M/float(fs), min(y), max(y)])
+    plt.ylabel('amplitude')
+    plt.xlabel('time (sec)')
+    plt.title('output sound: y')
+
+    plt.tight_layout()
+    plt.ion()
+    plt.show()
 
 if __name__ == "__main__":
-	main()
+    main()

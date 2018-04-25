@@ -9,14 +9,15 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), './uti
 try:
 	import utilFunctions_C as UF_C
 except ImportError:
-	print "\n"
-	print "-------------------------------------------------------------------------------"
-	print "Warning:"
-	print "Cython modules for some of the core functions were not imported."
-	print "Please refer to the README.md file in the 'sms-tools' directory, for the instructions to compile the cython modules"
-	print "Exiting the code!!"
-	print "-------------------------------------------------------------------------------"
-	print "\n"
+	print ("\n")
+	print ("-------------------------------------------------------------------------------")
+	print ("Warning:")
+	print ("Cython modules for some of the core functions were not imported.")
+	print ("Please refer to the README.md file in the 'sms-tools' directory,")
+	print ("for the instructions to compile the cython modules.")
+	print ("Exiting the code!!")
+	print ("-------------------------------------------------------------------------------")
+	print ("\n")
 	sys.exit(0)
 	
 winsound_imported = False	
@@ -25,7 +26,7 @@ if sys.platform == "win32":
 		import winsound
 		winsound_imported = True
 	except:
-		print "You won't be able to play sounds, winsound could not be imported"
+		print ("You won't be able to play sounds, winsound could not be imported")
 
 def isPower2(num):
 	"""
@@ -102,7 +103,7 @@ def peakDetection(mX, t):
 	returns ploc: peak locations
 	"""
 
-	thresh = np.where(mX[1:-1]>t, mX[1:-1], 0);             # locations above threshold
+	thresh = np.where(np.greater(mX[1:-1],t), mX[1:-1], 0); # locations above threshold
 	next_minor = np.where(mX[1:-1]>mX[2:], mX[1:-1], 0)     # locations higher than the next one
 	prev_minor = np.where(mX[1:-1]>mX[:-2], mX[1:-1], 0)    # locations higher than the previous one
 	ploc = thresh * next_minor * prev_minor                 # locations fulfilling the three criteria
@@ -174,7 +175,7 @@ def genSpecSines_p(ipfreq, ipmag, ipphase, N, fs):
 	"""
 
 	Y = np.zeros(N, dtype = complex)                 # initialize output complex spectrum
-	hN = N/2                                         # size of positive freq. spectrum
+	hN = N//2                                        # size of positive freq. spectrum
 	for i in range(0, ipfreq.size):                  # generate all sine spectral lobes
 		loc = N * ipfreq[i] / fs                       # it should be in range ]0,hN-1[
 		if loc==0 or loc>hN-1: continue
@@ -238,7 +239,7 @@ def cleaningTrack(track, minTrackLength=3):
 
 	nFrames = track.size                                # number of frames
 	cleanTrack = np.copy(track)                         # copy arrat
-	trackBegs = np.nonzero((track[:nFrames-1] <= 0)     # begining of track contours
+	trackBegs = np.nonzero((track[:nFrames-1] <= 0)     # beginning of track contours
 								& (track[1:]>0))[0] + 1
 	if track[0]>0:
 		trackBegs = np.insert(trackBegs, 0, 0)
@@ -262,7 +263,7 @@ def f0Twm(pfreq, pmag, ef0max, minf0, maxf0, f0t=0):
 	returns f0: fundamental frequency in Hz
 	"""
 	if (minf0 < 0):                                  # raise exception if minf0 is smaller than 0
-		raise ValueError("Minumum fundamental frequency (minf0) smaller than 0")
+		raise ValueError("Minimum fundamental frequency (minf0) smaller than 0")
 
 	if (maxf0 >= 10000):                             # raise exception if maxf0 is bigger than 10000Hz
 		raise ValueError("Maximum fundamental frequency (maxf0) bigger than 10000Hz")
@@ -350,7 +351,7 @@ def sineSubtraction(x, N, H, sfreq, smag, sphase, fs):
 	returns xr: residual sound
 	"""
 
-	hN = N/2                                           # half of fft size
+	hN = N//2                                          # half of fft size
 	x = np.append(np.zeros(hN),x)                      # add zeros at beginning to center first window at sample 0
 	x = np.append(x,np.zeros(hN))                      # add zeros at the end to analyze last sample
 	bh = blackmanharris(N)                             # blackman harris window
@@ -381,7 +382,7 @@ def stochasticResidualAnal(x, N, H, sfreq, smag, sphase, fs, stocf):
 	returns stocEnv: stochastic approximation of residual
 	"""
 
-	hN = N/2                                              # half of fft size
+	hN = N//2                                             # half of fft size
 	x = np.append(np.zeros(hN),x)                         # add zeros at beginning to center first window at sample 0
 	x = np.append(x,np.zeros(hN))                         # add zeros at the end to analyze last sample
 	bh = blackmanharris(N)                                # synthesis window
