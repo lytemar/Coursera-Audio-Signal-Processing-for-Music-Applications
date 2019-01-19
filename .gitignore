@@ -4,6 +4,7 @@
 *.o
 *.py~
 workspace_dev/*
-workspace/*.py*
+workspace/*
 software/models_interface/output_sounds/*.wav
 software/transformations_interface/output_sounds/*.wav
+.ipynb_checkpoints/
