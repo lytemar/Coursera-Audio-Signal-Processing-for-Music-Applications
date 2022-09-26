@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/.idea/Coursera-Audio-Signal-Processing-for-Music-Applications.iml" filepath="$PROJECT_DIR$/.idea/Coursera-Audio-Signal-Processing-for-Music-Applications.iml" />
+=======
+      <module fileurl="file://$PROJECT_DIR$/.idea/sms-tools.iml" filepath="$PROJECT_DIR$/.idea/sms-tools.iml" />
+>>>>>>> upstream/master
     </modules>
   </component>
 </project>
