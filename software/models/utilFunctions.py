@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.signal import resample
 from scipy.signal.windows import blackmanharris, triang
-from scipy.fftpack import fft, ifft, fftshift
+from scipy.fft import fft, ifft, fftshift
 import copy, sys, os
 from scipy.io.wavfile import write, read
 import subprocess
@@ -38,9 +38,9 @@ def isPower2(num):
     return ((num & (num - 1)) == 0) and num > 0
 
 
-INT16_FAC = (2 ** 15) - 1
-INT32_FAC = (2 ** 31) - 1
-INT64_FAC = (2 ** 63) - 1
+INT16_FAC = (2 ** 15)
+INT32_FAC = (2 ** 31)
+INT64_FAC = (2 ** 63)
 norm_fact = {'int16': INT16_FAC, 'int32': INT32_FAC, 'int64': INT64_FAC, 'float32': 1.0, 'float64': 1.0}
 
 
