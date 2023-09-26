@@ -25,9 +25,8 @@ def main(inputFile = '../../sounds/piano.wav', window = 'hamming', M = 1024, N =
 	w = get_window(window, M, fftbins=True)
 
 	# compute the magnitude and phase spectrogram
-
 	mX, pX = STFT.stftAnal(x, w, N, H)
-	 
+
 	# perform the inverse stft
 	y = STFT.stftSynth(mX, pX, M, H)
 
