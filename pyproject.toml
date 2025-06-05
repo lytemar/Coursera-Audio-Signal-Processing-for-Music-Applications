@@ -1,0 +1,37 @@
+[project]
+name = "sms-tools"
+authors = [
+  { name="Music Technology Group, Universitat Pompeu Fabra", email="mtg-info@upf.edu" },
+]
+version = "1.0"
+description = "Sound analysis/synthesis tools for music applications"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "matplotlib",
+    "numpy<2.0.0",
+    "scipy"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Topic :: Multimedia :: Sound/Audio :: Analysis",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)"
+]
+
+[project.urls]
+Homepage = "https://github.com/mtg/sms-tools"
+Issues = "https://github.com/mtg/sms-tools/issues"
+
+[tool.setuptools.packages]
+find = {}
+
+
+[build-system]
+requires = ["setuptools", "wheel", "oldest-supported-numpy", "Cython"]
+build-backend = "setuptools.build_meta"
+
+[tool.cibuildwheel]
+# Skip unneeded wheels: PyPy, python 3.6-3.8, musl, linux 32 bit, PPC, s390, windows 32bit
+skip = ["pp*", "cp36*", "cp37*", "cp38", "*i686*", "*musllinux*", "*ppc64le*", "*s390x*", "*win32"]
